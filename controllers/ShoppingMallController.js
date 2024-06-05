@@ -12,7 +12,7 @@ const ShoppingMallController = {
         .send({ msg: "Ha habido un problema al crear el centro comercial" });
     }
   },
-  async getAllInvoices(req, res) {
+  async getAllShoppingData(req, res) {
     try {
       let page = parseInt(req.query.page, 10) || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
@@ -22,7 +22,28 @@ const ShoppingMallController = {
       }
       const skip = (page - 1) * limit;
 
-      const invoices = await ShoppingMall.find().skip(skip).limit(limit);
+      const invoices = await ShoppingMall.find();
+      //.skip(skip)
+      //.limit(limit);
+      console.log(invoices);
+      res.send({ ok: true, msg: "ModelData", invoices });
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send({ ok: false, msg: "Error", error });
+    }
+  },
+  async getAllInvoices(req, res) {
+    try {
+      const invoices = await ShoppingMall.aggregate([
+        {
+          $project: {
+            quantity: 1,
+            payment_method: 1,
+            gender: 1,
+            category: 1,
+          },
+        },
+      ]);
       res.send({ ok: true, msg: "ModelData", invoices });
     } catch (error) {
       console.error("Error:", error);
